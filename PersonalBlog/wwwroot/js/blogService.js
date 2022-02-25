@@ -1,21 +1,53 @@
-﻿define(['./template.js'], function (template) {
+﻿define(['./template.js', '../lib/showdown/showdown.js', './clientStorage.js'], function (template, showdown, clientStorage) {
 
-    const blogPostUrl = '/Home/LatestBlogPosts/';
+    const blogPostsUrl = '/Home/LatestBlogPost/';
+    const blogPostUrl = '/Home/Post/?link=';
+    const loadMorePostsUrl = '/Home/MoreBlogPosts/?oldestBlogPostId=';
 
-    function loadLatestBlogPosts() {
-        fetch(blogPostUrl)
+    async function loadData(url) {
+        let connectionStatus = '';
+        try {
+            const response = await fetch(url);
+            const json = await response.json();
+            clientStorage.addPost(json);
+            connectionStatus = 'Conexao com a API ok';
+        } catch (e) {
+            console.log('Error ao carregar data: ', e);
+            connectionStatus = 'Nao foi possivel buscar dados na API, vamos seguir offline';
+        }
+
+        const posts = await clientStorage.getPosts();
+        template.appendBlogList(posts);
+        $('#connection-status').html(connectionStatus);
+    }
+
+    async function loadLatestBlogPosts() {
+        await loadData(blogPostsUrl);
+    }
+
+    function loadBlogPost(link) {
+        fetch(blogPostUrl + link)
             .then(function (response) {
-                return response.json();
-            }).then(function (data) {
-                template.appendBlogList(data);             
+                return response.text();
+            })
+            .then(function (data) {
+                const converter = new showdown.Converter();
+                html = converter.makeHtml(data);
+                template.showBlogItem(html, link);
+                window.location = '#' + link;
             })
             .catch(function (error) {
-                console.log('Erro ao carregar blogs: ', error);
+                console.log('Erro ao carregar')
             });
     }
 
-    return {
-        loadLatestBlogPosts: loadLatestBlogPosts
+    async function loadMoreBlogPosts() {
+        await loadData(loadMorePostsUrl + clientStorage.getOldestBlogPostId());
     }
 
-})
+    return {
+        loadLatestBlogPosts: loadLatestBlogPosts,
+        loadBlogPost: loadBlogPost,
+        loadMoreBlogPosts: loadMoreBlogPosts
+    }
+});

@@ -15,7 +15,8 @@ namespace PersonalBlog.Controllers
         private readonly ILogger<HomeController> _logger;
         private readonly IBlogService _blogService;
 
-        public HomeController(ILogger<HomeController> logger, IBlogService blogService)
+        public HomeController(ILogger<HomeController> logger,
+            IBlogService blogService)
         {
             _logger = logger;
             _blogService = blogService;
@@ -37,12 +38,21 @@ namespace PersonalBlog.Controllers
             return View(new ErrorViewModel { RequestId = Activity.Current?.Id ?? HttpContext.TraceIdentifier });
         }
 
-        public JsonResult LatestBlogPosts()
+        public JsonResult LatestBlogPost()
         {
-            var posts = _blogService.GetBlogPosts();
-
+            var posts = _blogService.GetLatestPosts();
             return Json(posts);
         }
 
+        public JsonResult MoreBlogPosts(int oldestBlogPostId)
+        {
+            var posts = _blogService.GetOlderPosts(oldestBlogPostId);
+            return Json(posts);
+        }
+
+        public ContentResult Post(string link)
+        {
+            return Content(_blogService.GetPostText(link));
+        }
     }
 }
