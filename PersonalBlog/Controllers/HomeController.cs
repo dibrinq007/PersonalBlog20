@@ -53,6 +53,7 @@ namespace PersonalBlog.Controllers
         public ContentResult Post(string link)
         {
             return Content(_blogService.GetPostText(link));
+
         }
     }
 }
