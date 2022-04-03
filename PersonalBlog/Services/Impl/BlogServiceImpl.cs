@@ -1,19 +1,21 @@
 ﻿using Microsoft.AspNetCore.Hosting;
+using PersonalBlog.Interface;
 using PersonalBlog.Models;
-using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
-using System.Threading.Tasks;
 
 namespace PersonalBlog.Services.Impl
 {
     public class BlogServiceImpl : IBlogService
-    {
+    {     
         private readonly IHostingEnvironment _env;
-        public BlogServiceImpl(IHostingEnvironment env)
+        private readonly IBlogRepository _repository;
+
+        public BlogServiceImpl(IHostingEnvironment env, IBlogRepository repository)
         {
             _env = env;
+            _repository = repository;
         }
 
         private List<BlogPost> Posts
@@ -46,19 +48,22 @@ namespace PersonalBlog.Services.Impl
 
         public List<BlogPost> GetLatestPosts()
         {
-            return GetLastOrderingPosts(Posts);
+            var posts = _repository.List();
+            return GetLastOrderingPosts(posts);
         }
 
         public List<BlogPost> GetOlderPosts(int olderBlogPostId)
         {
-            var query = Posts.Where(post => post.PostId < olderBlogPostId);
+            var posts = _repository.List();
+            var query = posts.Where(post => post.PostId < olderBlogPostId);
             return GetLastOrderingPosts(query);
         }
 
         public string GetPostText(string link)
         {
-            var post = Posts.FirstOrDefault(post => post.Link == link);
-
+            var posts = _repository.List();
+            var post = posts.FirstOrDefault(post => post.Link == link);
+          //  return post.Content;
             return File.ReadAllText($"{_env.ContentRootPath}/wwwroot/Posts/{post.PostId}_post.md");
         }
     }

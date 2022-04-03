@@ -1,10 +1,7 @@
 ﻿using PersonalBlog.Models;
-using System;
 using System.Collections.Generic;
-using System.Linq;
-using System.Threading.Tasks;
 
-namespace PersonalBlog.Services
+namespace PersonalBlog.Interface
 {
     public interface IBlogService
     {

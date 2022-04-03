@@ -1,15 +1,12 @@
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Hosting;
-using Microsoft.AspNetCore.HttpsPolicy;
+using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
-using PersonalBlog.Services;
+using PersonalBlog.Interface;
+using PersonalBlog.Persistence;
 using PersonalBlog.Services.Impl;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Threading.Tasks;
 
 namespace PersonalBlog
 {
@@ -26,7 +23,12 @@ namespace PersonalBlog
         public void ConfigureServices(IServiceCollection services)
         {
             services.AddControllersWithViews();
-            services.AddSingleton<IBlogService, BlogServiceImpl>();
+         
+            var connection = @"Server=NOTE7;Database=PersonalBlogFiap;User ID=UserFiap;Password=123;TrustServerCertificate=True;Trusted_Connection=False;Connection Timeout=30;Integrated Security=False;Persist Security Info=False;Encrypt=True;MultipleActiveResultSets=True;";
+            services.AddDbContext<PersonalBlogContext>(options => options.UseSqlServer(connection));
+
+            services.AddScoped<IBlogService, BlogServiceImpl>();
+            services.AddScoped<IBlogRepository, PersonalBlogRepository>();
         }
 
         // This method gets called by the runtime. Use this method to configure the HTTP request pipeline.
